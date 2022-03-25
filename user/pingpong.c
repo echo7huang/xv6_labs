@@ -14,8 +14,8 @@ int main(int argc, char const *argv[]){
     pipe(p2c);
     pipe(c2p);
 
-    //create the byte to be written
-    char buff= "x";
+    //create the byte to be written, DO NOT USE ""
+    char buff= 'x';
 
     /*If the process is parent:
      *
