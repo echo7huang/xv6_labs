@@ -8,7 +8,7 @@ void pipeline(int rp){
 
     //read reaches EOF
     if(read(rp, &p, sizeof(int)) == 0){
-        close(p[0]);
+        close(rp);
         exit(0);
     }
 
