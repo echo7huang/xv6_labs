@@ -32,7 +32,7 @@ int main(int argc, char const *argv[]){
 
         write(p2c[W], &buff, sizeof(char));
         read(c2p[R], &buff, sizeof(char));
-        printf("%d: received pong", getpid());
+        printf("%d: received pong\n", getpid());
 
         close(p2c[W]);
         close(c2p[R]);
@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]){
         close(c2p[R]);
 
         read(p2c[R], &buff, sizeof(char));
-        printf("%d: received ping", getpid());
+        printf("%d: received ping\n", getpid());
         write(c2p[W], &buff, sizeof(char));
 
         close(p2c[R]);
