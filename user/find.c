@@ -35,6 +35,8 @@ void find(char *path, const char *filename)
     strcpy(buf, path);
     p = buf + strlen(buf);
     *p++ = '/'; //p points to the last '/'
+
+
     while (read(fd, &de, sizeof de) == sizeof de) {
         if (de.inum == 0)
             continue;
