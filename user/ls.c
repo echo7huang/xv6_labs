@@ -3,6 +3,7 @@
 #include "user/user.h"
 #include "kernel/fs.h"
 
+//Output the formatted name of path
 char*
 fmtname(char *path)
 {
@@ -26,15 +27,17 @@ void
 ls(char *path)
 {
   char buf[512], *p;
-  int fd;
+  int fd; //file descriptor
   struct dirent de;
   struct stat st;
 
+  //fd opens the path
   if((fd = open(path, 0)) < 0){
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
 
+  //fstat() copies the file status from fd(path) to &st
   if(fstat(fd, &st) < 0){
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
