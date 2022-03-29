@@ -24,14 +24,14 @@ int main(int argc, char *argv[])
         args[i] = buf;
         args[i+1] = 0;
 
-        if (fork() == 0) {
+//        if (fork() == 0) {
             // printf("command: %s\n", args[1]);
             // args[0] = xargs, args[1] = the command，the remaining are arguments
             exec(args[1], args+1);
             printf("exec error\n");
-        } else {
-            wait((void*)0);
-        }
+//        } else {
+//            wait((void*)0);
+//        }
     }
 
     exit(0);
