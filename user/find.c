@@ -1,70 +1,73 @@
 #include "kernel/types.h"
-
-#include "kernel/fs.h"
 #include "kernel/stat.h"
 #include "user/user.h"
+#include "kernel/fs.h"
 
-void find(char *path, const char *filename)
+void
+find(const char *path, const char *filename, const char *etname)
 {
-    char buf[512], *p;
-    int fd;
-    struct dirent de;
-    struct stat st;
+    char buf[512], *p;  // file path
+    int fd;             // file descriptor
+    struct dirent de;   // directory
+    struct stat st;     // file information
 
+    // open the file
     if ((fd = open(path, 0)) < 0) {
-        fprintf(2, "find: cannot open %s\n", path);
+        fprintf(2, "find: cannot %s\n", path);
         return;
     }
-
-    if (fstat(fd, &st) < 0) {
-        fprintf(2, "find: cannot fstat %s\n", path);
+    // get the file information
+    if(fstat(fd, &st) < 0){
+        fprintf(2, "find: cannot stat %s\n", path);
         close(fd);
         return;
     }
-
-    //argument error, argv[1] must be the directory name, not the file name
-    if (st.type != T_DIR) {
-        fprintf(2, "usage: find <DIRECTORY> <filename>\n");
-        return;
+    // determine file type
+    switch (st.type) {
+        // if file, then check name
+        case T_FILE:
+            if (etname && 0 == strcmp(etname, filename))
+                printf("%s\n", path);
+            break;
+            // if directory, then find recursively
+        case T_DIR:
+            if (strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
+                printf("find: path too long\n");
+                break;
+            }
+            strcpy(buf, path);
+            p = buf + strlen(buf);
+            *p++ = '/';
+            // scan every file in the directory
+            while (read(fd, &de, sizeof(de)) == sizeof(de)){
+                if (de.inum == 0)
+                    continue;
+                // scip "." and ".."
+                if (strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0)
+                    continue;
+                memmove(p, de.name, DIRSIZ);    // concatenate the strings
+                p[DIRSIZ] = 0;                  // add end_of_string
+                // printf("%s\n", buf);
+                find(buf, filename, p);        // find recursively
+            }
+            break;
     }
-
-    if (strlen(path) + 1 + DIRSIZ + 1 > sizeof buf) {
-        fprintf(2, "find: path too long\n");
-        return;
-    }
-    strcpy(buf, path);
-    p = buf + strlen(buf);
-    *p++ = '/'; //p points to the last '/'
-
-
-    while (read(fd, &de, sizeof de) == sizeof de) {
-        if (de.inum == 0)
-            continue;
-        memmove(p, de.name, DIRSIZ); //add path name
-        p[DIRSIZ] = 0;               //sign indicating end of path string
-        if (stat(buf, &st) < 0) {
-            fprintf(2, "find: cannot stat %s\n", buf);
-            continue;
-        }
-
-        //if found then output the path
-        //if not found then find recursively
-        if (st.type == T_DIR && strcmp(p, ".") != 0 && strcmp(p, "..") != 0) {
-            find(buf, filename);
-        } else if (strcmp(filename, p) == 0)
-            printf("%s\n", buf);
-    }
-
     close(fd);
 }
 
-int main(int argc, char *argv[])
+void
+findfile(const char *path, const char *filename)
 {
-    if (argc != 3) {
-        fprintf(2, "usage: find <directory> <filename>\n");
-        exit(1);
-    }
-    find(argv[1], argv[2]);
-    exit(0);
+    find(path, filename, (void*)0);
 }
 
+int
+main(int argc, char const *argv[])
+{
+    if (argc != 3) {
+        printf("Usage: find <dir> <filename>");
+        exit(1);
+    }
+    findfile(argv[1], argv[2]);
+    exit(0);
+}

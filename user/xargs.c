@@ -5,42 +5,32 @@
 
 int main(int argc, char *argv[])
 {
-
-    // save para from argv[] to args[]
+    // save the arguments
     char *args[MAXARG];
     int i;
     for (i = 0; i < argc; ++i)
         args[i] = argv[i];
 
-    //buffer for stdin
     char buf[256];
 
     for (;;) {
-
-        // read a line from stdin
-
+        // read lines from stdin
         int j = 0;
-        while ((read(0, buf+j, sizeof(char))) != 0 && buf[j] != '\n')
+        while ((0 != read(0, buf+j, sizeof(char))) && buf[j] != '\n')
             ++j;
-        if (j == 0) break; // all lines are read already
-        buf[j] = 0; // put 0 at the end of buffer
-        // insert buffer(containing stdin) as arguments to xargs
+        if (j == 0) break; // read all lines
+        buf[j] = 0; // end_of_string
+        // put the arguments in stdin into args[]
         args[i] = buf;
-        args[i+1] = 0; // put 0 at the end of args[]
-        // run the command
+        args[i+1] = 0;
 
-        /*
-         * what if no fork and exec?
-         * */
         if (fork() == 0) {
             // printf("command: %s\n", args[1]);
-            // args[0] is xargs (command's name)
-            // args[1] is the command (echo, for example)
-            // the remaining are the parameters
+            // args[0] = xargs, args[1] = the command，the remaining are arguments
             exec(args[1], args+1);
             printf("exec error\n");
         } else {
-            wait((void*)0); //parent waits for child
+            wait((void*)0);
         }
     }
 
