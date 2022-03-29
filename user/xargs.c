@@ -32,16 +32,16 @@ int main(int argc, char *argv[])
         /*
          * what if no fork and exec?
          * */
-        //if (fork() == 0) {
+        if (fork() == 0) {
             // printf("command: %s\n", args[1]);
             // args[0] is xargs (command's name)
             // args[1] is the command (echo, for example)
             // the remaining are the parameters
             exec(args[1], args+1);
             printf("exec error\n");
-        //} else {
-        //    wait((void*)0); //parent waits for child
-        //}
+        } else {
+            wait((void*)0); //parent waits for child
+        }
     }
 
     exit(0);
